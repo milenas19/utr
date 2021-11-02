@@ -256,7 +256,7 @@ int main(int argc, char *argv[]) {
   double Edep;
   vector<double> EdepBuffer(arguments.nhistograms, 0.);
 
-  fileChain.SetBranchAddress("edep", &Edep);
+  fileChain.SetBranchAddress("ekin", &Edep); // Maike is interested in kinetic energy of incident photons, not energy deposited into the target
   fileChain.SetBranchAddress("volume", &Volume);
   if (arguments.addback) {
     fileChain.SetBranchAddress("event", &Event);
