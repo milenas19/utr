@@ -66,7 +66,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	/***************** Define Lengths ************/ 
 
-	const double detector_to_bremstarget = 1180.*mm; // Position guesstimated
+	const double detector_to_bremstarget = 1000.*mm; // Position under-guesstimated, more realistic: 1180.*mm
 	const double bremstarget_thickness = 2.5*mm;
 	const double bremstarget_edge_length = 10*mm;
 	const double detector_radius = 5*mm;
@@ -83,7 +83,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4NistManager *nist = G4NistManager::Instance();
 	G4Material *vacuum = nist->FindOrBuildMaterial("G4_Galactic");  	//Vacuum
 	G4Material *gold = nist->FindOrBuildMaterial("G4_Au");              //Bremstarget
-	G4Material *detector_material = nist->FindOrBuildMaterial("G4_Pb");
+	// G4Material *detector_material = nist->FindOrBuildMaterial("G4_Pb");
 	
 
 	/******************** WORLD ******************/
@@ -114,7 +114,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	/******************** Detector ******************/
 	G4Tubs *Detector_solid = new G4Tubs("Detector_solid", 0, detector_radius, detector_length * 0.5, 0, twopi);
 
-	G4LogicalVolume *Detector_logical = new G4LogicalVolume(Detector_solid, detector_material, "Detector_logical", 0, 0, 0);
+	G4LogicalVolume *Detector_logical = new G4LogicalVolume(Detector_solid, vacuum, "Detector_logical", 0, 0, 0);
 
 	//Visualisierung (Farbe)
 	Detector_logical->SetVisAttributes(new G4VisAttributes(G4Color::Blue()));
@@ -128,9 +128,9 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 // Definiere das Detektorvolumen als Detektor/sensitives Volumen in Geant4
 void DetectorConstruction::ConstructSDandField() {
 
-	// TODO: Ask UFG whether this is the right detector, does this account for multiple gamma hits in the same event?
-	// Do we get two entries in the ROOT file for the two gammas in the same event or are they summed / one is ignored?
-	EnergyDepositionSD *DetectorSD = new EnergyDepositionSD("Detector_logical", "Detector_logical");
+	// Use ParticleSD instead of EnergyDepositionSD, as ParticleSD records the hits of each particle within a event individually regardless whether the particle actually deposited energy in the detector or not.
+	// An EnergyDepositionSD however only records a single particle per event and only if it actually left some energy in the detector
+	ParticleSD *DetectorSD = new ParticleSD("Detector_logical", "Detector_logical");
 	G4SDManager::GetSDMpointer()->AddNewDetector(DetectorSD);
 	DetectorSD->SetDetectorID(0);
 	SetSensitiveDetector("Detector_logical", DetectorSD, true);
