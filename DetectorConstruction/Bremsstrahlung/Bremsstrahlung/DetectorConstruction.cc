@@ -46,6 +46,7 @@ along with utr.  If not, see <http://www.gnu.org/licenses/>.
 #include "G4Tubs.hh"
 #include "G4VisAttributes.hh"
 #include "globals.hh"
+#include "G4SubtractionSolid.hh"
 
 // Sensitive Detectors
 #include "G4SDManager.hh"
@@ -60,13 +61,15 @@ along with utr.  If not, see <http://www.gnu.org/licenses/>.
 // #include "G4UnitsTable.hh"
 #include "utrConfig.h"
 #include <iostream>
+#include <array>
+
 
 
 G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	/***************** Define Lengths ************/ 
 
-	const double detector_to_bremstarget = 1000.*mm; // Position under-guesstimated, more realistic: 1180.*mm
+	const double detector_to_bremstarget = 1150.*mm; // Position under-guesstimated, more realistic: 1180.*mm
 	const double bremstarget_thickness = 2.5*mm;
 	const double bremstarget_edge_length = 10*mm;
 	const double detector_radius = 5*mm;
@@ -81,49 +84,89 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	/***************** Define Materials ************/
 
 	G4NistManager *nist = G4NistManager::Instance();
-	G4Material *vacuum = nist->FindOrBuildMaterial("G4_Galactic");  	//Vacuum
-	G4Material *gold = nist->FindOrBuildMaterial("G4_Au");              //Bremstarget
+	G4Material *vacuum = nist->FindOrBuildMaterial("G4_Galactic");  	
+	G4Material *gold = nist->FindOrBuildMaterial("G4_Au");              
 	// G4Material *detector_material = nist->FindOrBuildMaterial("G4_Pb");
 	
 
 	/******************** WORLD ******************/
 	G4Box *World_solid = new G4Box("World_solid", World_x * 0.5, World_y * 0.5, World_z * 0.5);
-
-	G4LogicalVolume *World_logical = new G4LogicalVolume(World_solid, vacuum, "World_logical", 0, 0, 0);
+	World_logical = new G4LogicalVolume(World_solid, vacuum, "World_logical", 0, 0, 0);   
 
 	//Visualisierung der Welt (Farbe)
 	G4VisAttributes *world_vis = new G4VisAttributes(true, G4Color::Red());
 	world_vis->SetForceWireframe(true);
 
 	World_logical->SetVisAttributes(world_vis);
-
 	G4VPhysicalVolume *World_physical = new G4PVPlacement(0, G4ThreeVector(), World_logical, "World", 0, false, 0);
 
 
 	/******************** Bremsttarget ******************/
 	G4Box *Bremstarget_solid = new G4Box("Bremstarget_solid", bremstarget_edge_length * 0.5, bremstarget_edge_length * 0.5, bremstarget_thickness * 0.5);
-
 	G4LogicalVolume *Bremstarget_logical = new G4LogicalVolume(Bremstarget_solid, gold, "Bremstarget_logical", 0, 0, 0);
 
 	//Visualisierung (Farbe)
 	Bremstarget_logical->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
-
-	G4VPhysicalVolume *Bremstarget_physical = new G4PVPlacement(0, G4ThreeVector(0, 0, -detector_to_bremstarget/2), Bremstarget_logical, "Bremstarget", World_logical, false, 0);
+	new G4PVPlacement(0, G4ThreeVector(0, 0, -detector_to_bremstarget/2), Bremstarget_logical, "Bremstarget", World_logical, false, 0);
 
 
 	/******************** Detector ******************/
 	G4Tubs *Detector_solid = new G4Tubs("Detector_solid", 0, detector_radius, detector_length * 0.5, 0, twopi);
-
 	G4LogicalVolume *Detector_logical = new G4LogicalVolume(Detector_solid, vacuum, "Detector_logical", 0, 0, 0);
 
 	//Visualisierung (Farbe)
 	Detector_logical->SetVisAttributes(new G4VisAttributes(G4Color::Blue()));
+	new G4PVPlacement(0, G4ThreeVector(0, 0, detector_to_bremstarget/2), Detector_logical, "Detector", World_logical, false, 0);
+	
 
-	G4VPhysicalVolume *Detector_physical = new G4PVPlacement(0, G4ThreeVector(0, 0, detector_to_bremstarget/2), Detector_logical, "Detector", World_logical, false, 0);
+	ConstructCollimator(G4ThreeVector(0,0,0) );
+
 
 	print_info();
 	return World_physical;
 }
+
+
+void DetectorConstruction::ConstructCollimator(G4ThreeVector local_coordinates) 
+{
+	const std::size_t NBlocks = 10;
+	G4double block_x = World_x;		//x increases to the left from the perpective of the beam
+	G4double block_y = World_y;		//y increases towards the top
+	G4double block_z = 95. * mm;		//z lies in the direction of the beam
+	
+	//Materialis and Colors
+	G4NistManager *nist = G4NistManager::Instance();
+	G4Material *Cu = nist->FindOrBuildMaterial("G4_Cu");
+	G4Colour light_orange = G4Colour(1.0, 0.82, 0.36);
+
+	//*************************************************
+	// Colimator volume
+	//*************************************************
+	G4Box *big_block = new G4Box("blockwithouthole", block_x * 0.5, block_y * 0.5, block_z * 0.5);
+
+	G4double colholeradius_min = 6. * mm;
+	G4double colholeradius_max = 10. * mm;
+
+	G4double hole_radius;
+	std::array<G4Tubs*, NBlocks> hole;
+	G4SubtractionSolid *Collimator_block[NBlocks];
+	G4LogicalVolume *Collimator_blocks_logical[NBlocks];
+
+	// _________________________ Block Loop _________________________
+	for (std::size_t i = 0; i < NBlocks; ++i){
+		hole_radius = colholeradius_max - i * (colholeradius_max - colholeradius_min) / (NBlocks - 1);
+		hole[i] = new G4Tubs(("hole" + std::to_string(i)).c_str(), 0., hole_radius, block_z * 0.51, 0., 360 * deg);
+		
+		Collimator_block[i] = new G4SubtractionSolid(("Collimator_Block" + std::to_string(i)).c_str(), big_block, hole[i]);
+		
+		Collimator_blocks_logical[i] = new G4LogicalVolume(Collimator_block[i], Cu, ("Collimator_Block" + std::to_string(i)).c_str(), 0, 0, 0);
+		Collimator_blocks_logical[i]->SetVisAttributes(light_orange);
+
+		new G4PVPlacement(0, local_coordinates + G4ThreeVector(0., 0., (NBlocks * 0.5 - i - 0.5) * block_z), Collimator_blocks_logical[i], ("Collimator_Block" + std::to_string(i)).c_str(), World_logical, 0, 0);
+	}
+}
+
+
 
 // Definiere das Detektorvolumen als Detektor/sensitives Volumen in Geant4
 void DetectorConstruction::ConstructSDandField() {

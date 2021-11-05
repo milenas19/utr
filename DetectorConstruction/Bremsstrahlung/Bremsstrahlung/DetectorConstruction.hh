@@ -21,6 +21,7 @@ along with utr.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include "G4VUserDetectorConstruction.hh"
+#include "G4ThreeVector.hh"
 
 class DetectorConstruction : public G4VUserDetectorConstruction {
   public:
@@ -33,6 +34,10 @@ private:
 	G4double World_x;
 	G4double World_y;
 	G4double World_z;
+	G4LogicalVolume *World_logical;
+
+	void ConstructCollimator(G4ThreeVector local_coordinates);
+
 
 };
 
