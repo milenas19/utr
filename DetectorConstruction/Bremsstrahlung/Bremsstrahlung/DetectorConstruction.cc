@@ -64,12 +64,20 @@ along with utr.  If not, see <http://www.gnu.org/licenses/>.
 #include <array>
 
 
+//last collimator Block at position: +475mm (end of block)
+//Detector at position: +574.5mm = detector_to_bremstarget/2 - detector_length/2 (beginning of detector)
+//diff det-coll: 99.5mm but should be: 162mm -> 62.5mm missing -> correction=2*62.5mm=125mm
+//Bremstarget at position: -637mm+1.25mm=635.75mm -> -detector_to_bremstarget/2+bremstarget_thickness/2 (end of Bremstarget)
+//Distance Coll.-Bremstarget: 160.75mm but should be: 40mm -> correction_brems=120.75
+
 
 G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	/***************** Define Lengths ************/ 
 
-	const double detector_to_bremstarget = 1150.*mm; // Position under-guesstimated, more realistic: 1180.*mm
+	const double correction = 125.*mm;
+	const double correction_brems = 120.75*mm;
+	const double detector_to_bremstarget = correction+1150.*mm; 
 	const double bremstarget_thickness = 2.5*mm;
 	const double bremstarget_edge_length = 10*mm;
 	const double detector_radius = 5*mm;
@@ -78,7 +86,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	World_x = (detector_radius + world_buffer_length) * 2;
 	World_y = (detector_radius + world_buffer_length) * 2;
-	World_z = detector_to_bremstarget + bremstarget_thickness + detector_length + 2 * world_buffer_length;
+	World_z = detector_to_bremstarget + 2 * world_buffer_length;
 
 
 	/***************** Define Materials ************/
@@ -107,7 +115,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	//Visualisierung (Farbe)
 	Bremstarget_logical->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
-	new G4PVPlacement(0, G4ThreeVector(0, 0, -detector_to_bremstarget/2), Bremstarget_logical, "Bremstarget", World_logical, false, 0);
+	new G4PVPlacement(0, G4ThreeVector(0, 0, -detector_to_bremstarget/2+correction_brems), Bremstarget_logical, "Bremstarget", World_logical, false, 0);
 
 
 	/******************** Detector ******************/
