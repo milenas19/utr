@@ -20,7 +20,7 @@
 
 #[utrBuildOptions]
 #CAMPAIGN=Bremsstrahlung
-#DETECTOR_CONSTRUCTION=Bremsstrahlung
+#DETECTOR_CONSTRUCTION=Bremsstrahlung_Sn116
 #GENERATOR_ANGCORR=OFF
 #GENERATOR_ANGDIST=OFF
 #EVENT_EKIN=ON
@@ -67,7 +67,7 @@
 #/gps/pos/type Beam
 #/gps/pos/shape Circle
 #/gps/pos/radius 0.5 mm
-/gps/pos/centre 0. 0. -530 mm
+/gps/pos/centre 0. 0. -560 mm
 /gps/direction 0. 0. 1.
 #/gps/polarization 1. 0. 0.
 

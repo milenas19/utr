@@ -78,9 +78,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	const double correction = 125.*mm;
 	const double correction_brems = 120.75*mm;
 	const double detector_to_bremstarget = correction+1150.*mm; 
-	const double bremstarget_thickness = 2.5*mm;
+	const double bremstarget_thickness1 = 0.5*mm;
+	const double bremstarget_thickness2 = 2.5*mm;
+	const double half_distance_bremstargets = 10*mm;
 	const double bremstarget_edge_length = 10*mm;
-	const double detector_radius = 5*mm;
+	const double detector_radius = 10*mm;
 	const double detector_length = 1*mm;
 	const double world_buffer_length = 10*mm;
 
@@ -109,13 +111,23 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4VPhysicalVolume *World_physical = new G4PVPlacement(0, G4ThreeVector(), World_logical, "World", 0, false, 0);
 
 
-	/******************** Bremsttarget ******************/
-	G4Box *Bremstarget_solid = new G4Box("Bremstarget_solid", bremstarget_edge_length * 0.5, bremstarget_edge_length * 0.5, bremstarget_thickness * 0.5);
-	G4LogicalVolume *Bremstarget_logical = new G4LogicalVolume(Bremstarget_solid, gold, "Bremstarget_logical", 0, 0, 0);
+
+	/******************** Bremsttarget 1 ******************/
+	G4Box *Bremstarget_solid1 = new G4Box("Bremstarget_solid1", bremstarget_edge_length * 0.5, bremstarget_edge_length * 0.5, bremstarget_thickness1 * 0.5);
+	G4LogicalVolume *Bremstarget_logical1 = new G4LogicalVolume(Bremstarget_solid1, gold, "Bremstarget_logical1", 0, 0, 0);
 
 	//Visualisierung (Farbe)
-	Bremstarget_logical->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
-	new G4PVPlacement(0, G4ThreeVector(0, 0, -detector_to_bremstarget/2+correction_brems), Bremstarget_logical, "Bremstarget", World_logical, false, 0);
+	Bremstarget_logical1->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
+	new G4PVPlacement(0, G4ThreeVector(0, 0, -detector_to_bremstarget/2+correction_brems-half_distance_bremstargets), Bremstarget_logical1, "Bremstarget", World_logical, false, 0);
+
+	/******************** Bremsttarget 2 ******************/
+	G4Box *Bremstarget_solid2 = new G4Box("Bremstarget_solid2", bremstarget_edge_length * 0.5, bremstarget_edge_length * 0.5, bremstarget_thickness2 * 0.5);
+	G4LogicalVolume *Bremstarget_logical2 = new G4LogicalVolume(Bremstarget_solid2, gold, "Bremstarget_logical2", 0, 0, 0);
+
+	//Visualisierung (Farbe)
+	Bremstarget_logical2->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
+	new G4PVPlacement(0, G4ThreeVector(0, 0, -detector_to_bremstarget/2+correction_brems +half_distance_bremstargets), Bremstarget_logical2, "Bremstarget", World_logical, false, 0);
+
 
 
 	/******************** Detector ******************/
