@@ -31,12 +31,20 @@ class DetectorConstruction : public G4VUserDetectorConstruction {
 	void print_info() const;
 
 private:
+	double targetposition_z;
+	double target_length;
+	double total_collimator_length;
+	double collimator_to_bremstarget;
+	double collimator_to_target;
+	double bremstarget_thickness;
+	G4double block_x;
+	G4double block_y;
 	G4double World_x;
 	G4double World_y;
 	G4double World_z;
 	G4LogicalVolume *World_logical;
 
-	void ConstructCollimator(G4ThreeVector local_coordinates);
+	void ConstructCollimatorBlocks(G4String &name, G4ThreeVector local_coordinates, G4double block_z, G4double holeradius);
 
 
 };

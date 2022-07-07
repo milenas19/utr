@@ -69,25 +69,24 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	/***************** Define Lengths (along beam direction) ************/ 
 
-	const double targetposition_z = 0*mm;
+	targetposition_z = 0*mm;
+	target_length = 1*mm;
 	const double target_radius = 5*mm;
-	const double target_length = 1*mm;
-	const double bremstarget_thickness = 2.5*mm;
+	bremstarget_thickness = 2.5*mm;
 	const double bremstarget_edge_length = 10*mm;
-	const double collimator_to_bremstarget = 20*mm;
-	const double collimator_to_target = 162*mm;
+	collimator_to_bremstarget = 20*mm;
+	collimator_to_target = 162*mm;
 	const int N_short = 10;
-	const double r_min_hole = 6 *mm;
+	//const double r_min_hole = 6 *mm;
 	const double blocklength_short = 100*mm;
 	const int N_long = 4;
 	const double r_max_hole = 6 *mm;
 	const double blocklength_long =120*mm;
-	const double total_collimator_length = N_short*blocklength_short + N_long*blocklength_long;
+	total_collimator_length = N_short*blocklength_short + N_long*blocklength_long;
 	const double world_buffer_length = 50*mm;
 
-
-	const double block_x = (target_radius + world_buffer_length);     //Collimator edge length depending on target radius (in reality ~300mm)
-	const double block_y = (target_radius + world_buffer_length);
+	block_x = (target_radius + world_buffer_length);     //Collimator edge length depending on target radius (in reality ~300mm)
+	block_y = (target_radius + world_buffer_length);
 	
 	World_z = (collimator_to_target + world_buffer_length + total_collimator_length);
 	World_x = block_x;
@@ -98,9 +97,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	G4NistManager *nist = G4NistManager::Instance();
 	G4Material *vacuum  = nist->FindOrBuildMaterial("G4_Galactic");  	
-	G4Material *gold    = nist->FindOrBuildMaterial("G4_Au");
-	G4Material *Cu      = nist->FindOrBuildMaterial("G4_Cu");
-	G4Colour light_orange = G4Colour(1.0, 0.82, 0.36);              	
+	G4Material *gold    = nist->FindOrBuildMaterial("G4_Au");              	
 
 	/******************** WORLD ******************/
 	G4Box *World_solid = new G4Box("World_solid", World_x, World_y, World_z);
@@ -111,7 +108,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	world_vis->SetForceWireframe(true);
 
 	World_logical->SetVisAttributes(world_vis);
-	G4VPhysicalVolume *World_physical = new G4PVPlacement(0, G4ThreeVector(), World_logical, "World", 0, false, 0);
+	G4VPhysicalVolume *World_physical = new G4PVPlacement(0, G4ThreeVector(), *World_logical, "World", 0, false, 0);
 
 
 	/******************** Bremstarget ******************/
@@ -138,31 +135,33 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	//Loop for 10 short Cu blocks with increasing hole radii from 6 to 12 mm in steps of +0.5 mm per block. 
 	for (int i = 0; i < N_short; ++i){
 
-		auto *name = ("Hole" + std::to_string(i)).c_str();
-		double r_step = 0.5*mm;
-		double holeradius = r_max_hole - r_step * i;
-		G4ThreeVector *local_coordinates = new G4ThreeVector(0, 0, targetposition_z-target_length/2 - collimator_to_target - blocklength_short*N_short (i+1)*blocklength_short/2);    // for loop with short blocks
+		G4String name = ("Hole" + std::to_string(i));
+		G4double r_step = 0.5*mm;
+		G4double holeradius = r_max_hole - r_step * i;
+		G4ThreeVector local_coordinates = G4ThreeVector(0, 0, targetposition_z-target_length/2 - collimator_to_target - blocklength_short*N_short*(i+1)*blocklength_short/2);    // for loop with short blocks
 		
 		//Ru the Main method to construct collimator blocks.
 		ConstructCollimatorBlocks(name, local_coordinates, blocklength_short, holeradius);
 		
 	}
 
-
 	print_info();
 	return World_physical;
 
 }
 
+//Method for creating single collimator blocks with a name, a position at local_coordinates, block length block_z and a hole radius holeradius. Tube (hole) is placed in the center of the block.
+void DetectorConstruction::ConstructCollimatorBlocks(G4String &name, G4ThreeVector local_coordinates, G4double block_z, G4double holeradius) {
 
-
-void DetectorConstruction::ConstructCollimatorBlocks(char name, G4ThreeVector local_coordinates, G4double block_z, G4double holeradius) {
+	G4NistManager *nist = G4NistManager::Instance();
+	G4Material *Cu  = nist->FindOrBuildMaterial("G4_Cu");
+	G4Colour light_orange = G4Colour(1.0, 0.82, 0.36);
 
 	auto *collimatorSolidSubstractionBox = new G4Box(name, block_x * 0.5, block_y * 0.5, block_z * 0.5);
 	auto *collimatorSolidSubstractionHole = new G4Tubs(name, 0., holeradius, block_z * 0.51, 0., twopi);
 	auto *collimatorSolid = new G4SubtractionSolid("collimatorSolid", collimatorSolidSubstractionBox, collimatorSolidSubstractionHole);
 	auto *collimatorLogical = new G4LogicalVolume(collimatorSolid, Cu, "collimatorLogical");
-	new G4PVPlacement(nullptr, local_coordinates, collimatorLogical, "collimator", worldLogical, false, 0);
+	new G4PVPlacement(0, local_coordinates, collimatorLogical, "collimator", World_logical, false, 0);
 	collimatorLogical->SetVisAttributes(light_orange);
 
 }
