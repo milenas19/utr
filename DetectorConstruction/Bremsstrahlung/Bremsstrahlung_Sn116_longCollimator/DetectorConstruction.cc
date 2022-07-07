@@ -76,20 +76,26 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	const double bremstarget_edge_length = 10*mm;
 	collimator_to_bremstarget = 20*mm;
 	collimator_to_target = 162*mm;
-	const int N_short = 10;
-	//const double r_min_hole = 6 *mm;
-	const double blocklength_short = 100*mm;
 	const int N_long = 4;
-	const double r_max_hole = 12 *mm;
+	const int N_short = 10;
+	const double blocklength_short = 100*mm;
 	const double blocklength_long =120*mm;
+	const double blocklength_last1 =2*mm;
+	const double blocklength_last2 =98*mm;
+	const double blocklength_last3 =20*mm;
+	const double r_hole_short_max = 10.5 *mm;   //maximum hole radius for short blocks of the collimator. First hole has r=6mm, then each hole has 0.5mm more.
+	const double r_hole_long = 12 *mm;
+	const double r_last1 = 12*mm;
+	const double r_last2 = 17.5*mm;
+	const double r_last3 = 24.75*mm;
 	total_collimator_length = N_short*blocklength_short + N_long*blocklength_long;
 	const double block_buffer_length = 20*mm;
 	const double world_buffer_length = 10*mm;
 
-	block_x = (target_radius + block_buffer_length);     //Collimator edge length depending on target radius (in reality ~300mm)
-	block_y = (target_radius + block_buffer_length);
+	block_x = (r_last3 + block_buffer_length);  //Collimator edge length depending on target radius (in reality ~300mm)
+	block_y = (r_last3 + block_buffer_length);
 	
-	World_z = ( target_length + collimator_to_target + total_collimator_length + collimator_to_bremstarget + bremstarget_thickness + world_buffer_length);
+	World_z = (target_length + collimator_to_target + total_collimator_length + collimator_to_bremstarget + bremstarget_thickness + world_buffer_length);
 	World_x = block_x + world_buffer_length;
 	World_y = block_y + world_buffer_length;
 
@@ -133,25 +139,48 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	
 	
 	/******************** Collimator ******************/
+	//Collimator consists of 14 blocks in total. the first 10 blocks have a length of 100mm and an increasing hole radius from 6mm to 10.5mm in steps of +0.5mm. The next 3 blocks have a length of 100mm and an increasing hole radius from 10.5mm to 12mm in steps of +0.5mm. The last block has 3 different hole radii with different lengths: 1st with length 2mm and radius 12mm, 2nd with length ~98mm and radius 17.5mm, 3rd with length 20mm and radius 24.75mm.
 
-	//Test collimator block.
+	/* Test collimator block. 
+	-----------------------------------------------------------------------
 	G4String name = std::string("CoolCollimator");
 	ConstructCollimatorBlocks(name, G4ThreeVector(0, 0, 0), 100*mm, 6*mm);
-
-	//Loop for 10 short Cu blocks with increasing hole radii from 6 to 12 mm in steps of +0.5 mm per block. 
-	/*
-	for (int i = 0; i < N_short; ++i){
-
-		G4String name = ("Hole" + std::to_string(i));
-		G4double r_step = 0.5*mm;
-		G4double holeradius = r_max_hole - r_step * i;
-		G4ThreeVector local_coordinates = G4ThreeVector(0, 0, targetposition_z-target_length/2 - collimator_to_target - blocklength_short*N_short*(i+1)*blocklength_short/2);    // for loop with short blocks
-		
-		//Ru the Main method to construct collimator blocks.
-		ConstructCollimatorBlocks(name, local_coordinates, blocklength_short, holeradius);	
-	}
+	-----------------------------------------------------------------------
 	*/
 
+	//Loop for 10 short Cu blocks with increasing hole radii from 6 to 10.5 mm in steps of +0.5 mm per block. 
+	for (int i = 0; i < N_short; ++i){
+
+		G4String name = ("Block_short" + std::to_string(i));
+		G4double r_step = 0.5*mm;
+		G4double holeradius = r_hole_short_max - r_step * i;
+		G4ThreeVector local_coordinates = G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - N_long*blocklength_long - blocklength_short/2 - blocklength_short*i);    
+		
+		//Main method to construct collimator blocks.
+		ConstructCollimatorBlocks(name, local_coordinates, blocklength_short, holeradius);	
+	}
+
+	//Loop for 3 long Cu blocks with increasing hole radii from 10.5 to 12 mm in steps of +0.5 mm per block. 
+	for (int i = 0; i < 3; ++i){
+
+		G4String name = ("Block_long" + std::to_string(i));
+		G4double r_step = 0.5*mm;
+		G4double holeradius = r_hole_long - r_step * i;
+		G4ThreeVector local_coordinates = G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - 1*blocklength_long - blocklength_long/2 - blocklength_long*i);   
+		
+		//Main method to construct collimator blocks.
+		ConstructCollimatorBlocks(name, local_coordinates, blocklength_long, holeradius);	
+	}
+
+	/*Last block with 3 different radii.
+	G4String last_block_name1 = std::string("LastBlock_part1");
+	G4String last_block_name2 = std::string("LastBlock_part2");
+	G4String last_block_name3 = std::string("LastBlock_part3");
+	ConstructCollimatorBlocks(last_block_name1, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - blocklength_last3 - blocklength_last2 - blocklength_last1/2), blocklength_long, r_last1);
+	ConstructCollimatorBlocks(last_block_name2, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - blocklength_last3 - blocklength_last2/2), blocklength_long, r_last2);
+	ConstructCollimatorBlocks(last_block_name3, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - blocklength_last3/2), blocklength_long, r_last3); //very last block in front of target
+	*/
+	
 	print_info();
 	return World_physical;
 }
