@@ -89,13 +89,14 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	const double r_last2 = 17.5*mm;
 	const double r_last3 = 24.75*mm;
 	total_collimator_length = N_short*blocklength_short + N_long*blocklength_long;
-	const double block_buffer_length = 20*mm;
+	const double block_buffer_length = 40*mm;
 	const double world_buffer_length = 10*mm;
+	const double world_buffer_length_z = 40*mm;  //additional space for z axis.
 
-	block_x = (r_last3 + block_buffer_length);  //Collimator edge length depending on target radius (in reality ~300mm)
+	block_x = (r_last3 + block_buffer_length);  //Collimator edge length depending on target radius (in reality ~300mm).
 	block_y = (r_last3 + block_buffer_length);
 	
-	World_z = (target_length + collimator_to_target + total_collimator_length + collimator_to_bremstarget + bremstarget_thickness + world_buffer_length);
+	World_z = (target_length + collimator_to_target + total_collimator_length + collimator_to_bremstarget + bremstarget_thickness + world_buffer_length + world_buffer_length_z);
 	World_x = block_x + world_buffer_length;
 	World_y = block_y + world_buffer_length;
 
@@ -172,14 +173,14 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 		ConstructCollimatorBlocks(name, local_coordinates, blocklength_long, holeradius);	
 	}
 
-	/*Last block with 3 different radii.
+	//Last block with 3 different radii.
 	G4String last_block_name1 = std::string("LastBlock_part1");
 	G4String last_block_name2 = std::string("LastBlock_part2");
 	G4String last_block_name3 = std::string("LastBlock_part3");
-	ConstructCollimatorBlocks(last_block_name1, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - blocklength_last3 - blocklength_last2 - blocklength_last1/2), blocklength_long, r_last1);
-	ConstructCollimatorBlocks(last_block_name2, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - blocklength_last3 - blocklength_last2/2), blocklength_long, r_last2);
-	ConstructCollimatorBlocks(last_block_name3, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - blocklength_last3/2), blocklength_long, r_last3); //very last block in front of target
-	*/
+	ConstructCollimatorBlocks(last_block_name1, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - blocklength_last3 - blocklength_last2 - blocklength_last1/2), blocklength_last1, r_last1);
+	ConstructCollimatorBlocks(last_block_name2, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - blocklength_last3 - blocklength_last2/2), blocklength_last2, r_last2);
+	ConstructCollimatorBlocks(last_block_name3, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - blocklength_last3/2), blocklength_last3, r_last3); //very last block in front of target
+	
 	
 	print_info();
 	return World_physical;
