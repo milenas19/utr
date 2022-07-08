@@ -100,7 +100,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	World_x = block_x + world_buffer_length;
 	World_y = block_y + world_buffer_length;
 
-	
+	 
 	/***************** Define Materials ************/
 
 	G4NistManager *nist = G4NistManager::Instance();

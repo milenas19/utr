@@ -68,7 +68,7 @@
 #/gps/pos/type Beam
 #/gps/pos/shape Circle
 #/gps/pos/radius 0.5 mm
-/gps/pos/centre 0. 0. -1680 mm
+/gps/pos/centre 0. 0. -1680 mm 
 /gps/direction 0. 0. 1.
 #/gps/polarization 1. 0. 0.
 
