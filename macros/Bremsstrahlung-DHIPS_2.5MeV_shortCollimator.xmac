@@ -6,7 +6,7 @@
 ## This macro simulates the generation of a bremsstrahlungs beam from electrons with an Au bremstarget to obtain the bremsstrahlung spectrum of the 116Sn to 112Sn relative measurement at DHIPS in 2020
 
 #[generalConfig]
-#outputDir=output/Bremsstrahlung_2.5MeV
+#outputDir=output/Bremsstrahlung_2.5MeV_shortCollimator
 #niceness=19
 #threads=200
 #ensureTerminalMultiplexer=True
@@ -20,7 +20,7 @@
 
 #[utrBuildOptions]
 #CAMPAIGN=Bremsstrahlung
-#DETECTOR_CONSTRUCTION=Bremsstrahlung_Sn112
+#DETECTOR_CONSTRUCTION=Bremsstrahlung_Sn112_shortCollimator
 #GENERATOR_ANGCORR=OFF
 #GENERATOR_ANGDIST=OFF
 #EVENT_EKIN=ON

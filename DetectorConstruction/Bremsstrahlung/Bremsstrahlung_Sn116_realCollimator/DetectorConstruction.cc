@@ -80,9 +80,9 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	const int N_short = 10;
 	const double blocklength_short = 100*mm;
 	const double blocklength_long =120*mm;
-	const double blocklength_last1 =2*mm;
+	const double blocklength_last1 =20*mm;
 	const double blocklength_last2 =98*mm;
-	const double blocklength_last3 =20*mm;
+	const double blocklength_last3 =2*mm;
 	const double r_hole_short_max = 10.5 *mm;   //maximum hole radius for short blocks of the collimator. First hole has r=6mm, then each hole has 0.5mm more.
 	const double r_hole_long = 12 *mm;
 	const double r_last1 = 12*mm;
