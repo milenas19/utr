@@ -3,10 +3,10 @@
 ## For real comment lines in the header use multiple '#'s
 ## Run utrwrapper.py -h for a list of all available configuration options and their effects
 
-## This macro simulates the generation of a bremsstrahlungs beam from electrons with an Au bremstarget to obtain the bremsstrahlung spectrum of the 112Sn relative measurement at DHIPS in 2015.
+## This macro simulates the generation of a bremsstrahlungs beam from electrons with an Au bremstarget to obtain the bremsstrahlung spectrum of the 120Sn to 112Sn relative measurement at DHIPS in 2022.
 
 #[generalConfig]
-#outputDir=output/Bremsstrahlung_2.5MeV_shortCollimator
+#outputDir=output/Bremsstrahlung_2.4MeV_realCollimator
 #niceness=19
 #threads=200
 #ensureTerminalMultiplexer=True
@@ -19,8 +19,9 @@
 #setterCmd=/gps/ene/mono {loopVar} MeV
 
 #[utrBuildOptions]
+#CMAKE_BUILD_TYPE=Release
 #CAMPAIGN=Bremsstrahlung
-#DETECTOR_CONSTRUCTION=Bremsstrahlung_Sn112_shortCollimator
+#DETECTOR_CONSTRUCTION=Bremsstrahlung_Sn120_realCollimator
 #GENERATOR_ANGCORR=OFF
 #GENERATOR_ANGDIST=OFF
 #EVENT_EKIN=ON
@@ -34,7 +35,7 @@
 
 
 #[getHistogramArgs]
-#maxenergy=2.8
+#maxenergy=2.5
 #maxid=0       # max ID of sensitive volumes
 
 #[histogramToTxtArgs]
@@ -67,7 +68,7 @@
 #/gps/pos/type Beam
 #/gps/pos/shape Circle
 #/gps/pos/radius 0.5 mm
-/gps/pos/centre 0. 0. -560 mm
+/gps/pos/centre 0. 0. -1700 mm 
 /gps/direction 0. 0. 1.
 #/gps/polarization 1. 0. 0.
 
@@ -80,4 +81,4 @@
 # To use the variable in the macro to be looped refer to it wrapped in {} as {Variable} in the macro
 # Remember that due to the numerical inaccuracies when adding float numbers, a loop might generate a run more or less than expected!
 /control/alias simulationRepeatCount 500
-/control/foreach macros/repeatSim.mac loopVar 2.5
+/control/foreach macros/repeatSim.mac loopVar 2.4

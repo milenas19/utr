@@ -71,10 +71,8 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	targetposition_z = 0*mm;
 	target_length = 1*mm;
-	const double target_radius = 10*mm;
-	bremstarget_thickness1 = 0.5*mm;
-	bremstarget_thickness2 = 2.5*mm;
-	distance_bremstargets = 15*mm;  //guesstimated distance between bremstargets
+	const double target_radius = 5*mm;
+	bremstarget_thickness = 2.5*mm;
 	const double bremstarget_edge_length = 10*mm;
 	collimator_to_bremstarget = 20*mm;
 	collimator_to_target = 162*mm;
@@ -98,7 +96,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	block_x = (r_last3 + block_buffer_length);  //Collimator edge length depending on target radius (in reality ~300mm).
 	block_y = (r_last3 + block_buffer_length);
 	
-	World_z = (target_length + collimator_to_target + total_collimator_length + collimator_to_bremstarget + bremstarget_thickness1 + bremstarget_thickness2 + distance_bremstargets + world_buffer_length + world_buffer_length_z);
+	World_z = (target_length + collimator_to_target + total_collimator_length + collimator_to_bremstarget + bremstarget_thickness + world_buffer_length + world_buffer_length_z);
 	World_x = block_x + world_buffer_length;
 	World_y = block_y + world_buffer_length;
 
@@ -122,25 +120,14 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	G4VPhysicalVolume *World_physical = new G4PVPlacement(0, G4ThreeVector(), World_logical, "World", 0, false, 0);
 
 
-	
-	/******************** Bremsttarget 1 (1st target with 0.5mm) ******************/
-	G4Box *Bremstarget_solid1 = new G4Box("Bremstarget_solid1", bremstarget_edge_length * 0.5, bremstarget_edge_length * 0.5, bremstarget_thickness1 * 0.5);
-	G4LogicalVolume *Bremstarget_logical1 = new G4LogicalVolume(Bremstarget_solid1, gold, "Bremstarget_logical1", 0, 0, 0);
+	/******************** Bremstarget ******************/
+	G4Box *Bremstarget_solid = new G4Box("Bremstarget_solid", bremstarget_edge_length * 0.5, bremstarget_edge_length * 0.5, bremstarget_thickness * 0.5);
+	G4LogicalVolume *Bremstarget_logical = new G4LogicalVolume(Bremstarget_solid, gold, "Bremstarget_logical", 0, 0, 0);
 
 	//Visualisierung (Farbe)
-	Bremstarget_logical1->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
-	new G4PVPlacement(0, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness2 - distance_bremstargets - bremstarget_thickness1/2),   Bremstarget_logical1, "Bremstarget", World_logical, false, 0);
+	Bremstarget_logical->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
+	new G4PVPlacement(0, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness/2), Bremstarget_logical, "Bremstarget", World_logical, false, 0);
 
-
-	/******************** Bremsttarget 2 (2nd target with 2.5mm) ******************/
-	G4Box *Bremstarget_solid2 = new G4Box("Bremstarget_solid2", bremstarget_edge_length * 0.5, bremstarget_edge_length * 0.5, bremstarget_thickness2 * 0.5);
-	G4LogicalVolume *Bremstarget_logical2 = new G4LogicalVolume(Bremstarget_solid2, gold, "Bremstarget_logical2", 0, 0, 0);
-
-	//Visualisierung (Farbe)
-	Bremstarget_logical2->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
-	new G4PVPlacement(0, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness2/2), Bremstarget_logical2, "Bremstarget", World_logical, false, 0);	
-	
-	
 	
 	/******************** Detector ******************/
 	G4Tubs *Detector_solid = new G4Tubs("Detector_solid", 0, target_radius, target_length * 0.5, 0, twopi);
@@ -234,7 +221,6 @@ void DetectorConstruction::print_info() const {
 	printf("> Position z Target:          ( %5.2f)               \n", targetposition_z);
 	printf("> Position z Collimator end:  ( %5.2f)               \n", targetposition_z - target_length/2 - collimator_to_target);
 	printf("> Position z Collimator start:( %5.2f)               \n", targetposition_z - target_length/2 - collimator_to_target - total_collimator_length);
-	printf("> Position z Bremstarget1:    ( %5.2f)               \n", targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness2 - distance_bremstargets - bremstarget_thickness1/2);
-	printf("> Position z Bremstarget2:    ( %5.2f)               \n", targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness2/2);
+	printf("> Position z Bremstarget:     ( %5.2f)               \n", targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness/2);
 	printf("==============================================================\n");
 }

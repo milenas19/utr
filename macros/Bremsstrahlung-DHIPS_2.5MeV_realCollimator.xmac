@@ -3,7 +3,7 @@
 ## For real comment lines in the header use multiple '#'s
 ## Run utrwrapper.py -h for a list of all available configuration options and their effects
 
-## This macro simulates the generation of a bremsstrahlungs beam from electrons with an Au bremstarget to obtain the bremsstrahlung spectrum of the 116Sn to 112Sn relative measurement at DHIPS in 2020
+## This macro simulates the generation of a bremsstrahlungs beam from electrons with an Au bremstarget to obtain the bremsstrahlung spectrum of the 112Sn relative measurement at DHIPS in 2015.
 
 #[generalConfig]
 #outputDir=output/Bremsstrahlung_2.5MeV_realCollimator
