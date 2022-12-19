@@ -70,9 +70,10 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	target_thickness = 2*mm;//changed for 76Ge experiment
 	bremstarget_thickness1 = 3*mm; // layer1 3 mm Cu,
 	bremstarget_thickness2 = 6*mm;	//  layer2 6 mm cu -2xlayer1
+	bremstarget_distance = 20*mm; // between bremstarget center positions
 	const double bremstarget_edge_length = 10*mm;// ???
 	beamhardener_thickness = 30*mm; // Al plates, positioned in front of the collimator 
-	//beamhardener_edge_lenght = ...*mm; 
+	double beamhardener_edge_length = 50*mm; 
 	collimator_to_bremstarget = 20*mm;
 	collimator_to_target = 162*mm;
 	const int N_long = 4;
@@ -95,11 +96,11 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	block_x = (r_last3 + block_buffer_length);  //Collimator edge length depending on target radius (in reality ~300mm).
 	block_y = (r_last3 + block_buffer_length);
 	
-	World_z = (target_length + collimator_to_target + total_collimator_length + beamhardener_thickness + collimator_to_bremstarget + bremstarget_thickness1 +  bremstarget_thickness2 + world_buffer_length + 	world_buffer_length_z);
+	World_z = (target_length + collimator_to_target + total_collimator_length + beamhardener_thickness + beamhardener_thickness + collimator_to_bremstarget + bremstarget_thickness1 + bremstarget_distance +  bremstarget_thickness2 + world_buffer_length + world_buffer_length_z);
 	World_x = block_x + world_buffer_length;
 	World_y = block_y + world_buffer_length;
-	//add beamhardener
-	 
+
+
 	/***************** Define Materials ************/
 
 	G4NistManager *nist = G4NistManager::Instance();
@@ -127,7 +128,7 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 
 	//Visualisierung (Farbe)
 	Bremstarget_logical1->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
-	new G4PVPlacement(0, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness2 - bremstarget_thickness1/2),   Bremstarget_logical1, "Bremstarget", World_logical, false, 0);
+	new G4PVPlacement(0, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness2 - bremstarget_distance - bremstarget_thickness1/2),   Bremstarget_logical1, "Bremstarget", World_logical, false, 0);
 	
 	/******************** Bremsttarget 2 (2nd target with 6 mm) ******************/
 	G4Box *Bremstarget_solid2 = new G4Box("Bremstarget_solid2", bremstarget_edge_length * 0.5, bremstarget_edge_length * 0.5, bremstarget_thickness2* 0.5);
@@ -137,14 +138,14 @@ G4VPhysicalVolume *DetectorConstruction::Construct() {
 	Bremstarget_logical2->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
 	new G4PVPlacement(0, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness2/2), Bremstarget_logical2, "Bremstarget", World_logical, false, 0);
 	
+
 	/******************** Beamhardener ******************/
-	
-//	G4Box *Beamhardener_solid = new G4Box("Beamhardener_solid", beamhardener_edge_length * 0.5, bremstarget_edge_length * 0.5, beamhardener_thickness* 0.5);
-//	G4LogicalVolume *Beamhardener_logical = new G4LogicalVolume(Beamhardener_solid, aluminum, "Beamhardener_logical", 0, 0, 0);
+	G4Box *Beamhardener_solid = new G4Box("Beamhardener_solid", beamhardener_edge_length * 0.5, bremstarget_edge_length * 0.5, beamhardener_thickness* 0.5);
+	G4LogicalVolume *Beamhardener_logical = new G4LogicalVolume(Beamhardener_solid, aluminum, "Beamhardener_logical", 0, 0, 0);
 
 	//Visualisierung (Farbe)
-//	Bremstarget_logical1->SetVisAttributes(new G4VisAttributes(G4Color::Yellow()));
-//	new G4PVPlacement(0, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget -beamhardener_thickness/2),   Beamhardener_logical, "Beamhardener", World_logical, false, 0);
+	Bremstarget_logical1->SetVisAttributes(new G4VisAttributes(G4Color::Gray()));
+	new G4PVPlacement(0, G4ThreeVector(0, 0, targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - beamhardener_thickness/2),   Beamhardener_logical, "Beamhardener", World_logical, false, 0);
 
 
 
@@ -240,6 +241,9 @@ void DetectorConstruction::print_info() const {
 	printf("> Position z Target:          ( %5.2f)               \n", targetposition_z);
 	printf("> Position z Collimator end:  ( %5.2f)               \n", targetposition_z - target_length/2 - collimator_to_target);
 	printf("> Position z Collimator start:( %5.2f)               \n", targetposition_z - target_length/2 - collimator_to_target - total_collimator_length);
-	printf("> Position z Bremstarget:     ( %5.2f)               \n", targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness1/2);
+	printf("> Position z Bremstarget1 end:     ( %5.2f)          \n", targetposition_z - target_length/2 - collimator_to_target - total_collimator_length - collimator_to_bremstarget - bremstarget_thickness2 - bremstarget_distance);
 	printf("==============================================================\n");
 }
+
+
+

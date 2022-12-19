@@ -35,6 +35,7 @@ private:
 	double total_collimator_length;
 	double collimator_to_bremstarget;
 	double collimator_to_target;
+	double bremstarget_distance;
 	double bremstarget_thickness1;
 	double bremstarget_thickness2;
 	double distance_bremstargets;
